@@ -1,0 +1,37 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam ArrowColor #21655F
+skinparam packageStyle rectangle
+
+title Arquitetura MVC implementada
+actor Usuário
+component "View\ntemplates/*.html\nstatic/style.css" as View
+component "Controller\ncontrollers.py\nrotas, sessão, CSRF, autorização" as Controller
+component "Model / Serviços\nservices.py\nregras e transações" as Services
+component "Model / DAO\nmodels.py\nContaDAO, VantagemDAO, extrato" as DAO
+component "Operação local\ncommands.py\ncarga, crédito, envio SMTP" as CLI
+component "Composição\napp.py\ncreate_app()" as App
+database "SQLite\nschema.sql\ncontas, histórico, caixa de saída" as DB
+cloud "SMTP externo\nSTARTTLS" as SMTP
+Usuário --> View
+View --> Controller : HTTP GET/POST
+Controller --> View : render_template
+Controller --> Services
+Controller --> DAO : consultas
+Services --> DAO : conexão / consultas
+DAO --> DB : SQL parametrizado
+CLI --> Services : crédito semestral
+CLI --> DAO : carga / pendências
+CLI --> SMTP : e-mails após commit
+App ..> Controller : registra Blueprint
+App ..> CLI : registra comandos
+note bottom of Services
+Débito, crédito, histórico e notificações
+confirmados na mesma transação.
+end note
+@enduml

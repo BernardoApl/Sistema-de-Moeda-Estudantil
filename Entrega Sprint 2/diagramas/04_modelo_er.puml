@@ -1,0 +1,96 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam ArrowColor #21655F
+skinparam packageStyle rectangle
+
+title Modelo ER físico - SQLite
+entity instituicoes {
+ * id : INTEGER <<PK>>
+ --
+ * nome : TEXT <<UNIQUE>>
+}
+entity contas {
+ * id : INTEGER <<PK>>
+ --
+ * perfil : TEXT
+ * nome : TEXT
+ * email : TEXT <<UNIQUE>>
+ * senha_hash : TEXT
+ * documento : TEXT <<UNIQUE>>
+ * rg : TEXT
+ * endereco : TEXT
+ * curso : TEXT
+ * departamento : TEXT
+ * telefone : TEXT
+ instituicao_id : INTEGER <<FK>>
+ * saldo : INTEGER
+ * ativo : INTEGER
+}
+entity vantagens {
+ * id : INTEGER <<PK>>
+ --
+ * empresa_id : INTEGER <<FK>>
+ * descricao : TEXT
+ * foto : TEXT
+ * custo : INTEGER
+ * ativo : INTEGER
+}
+entity transferencias {
+ * id : INTEGER <<PK>>
+ --
+ * professor_id : INTEGER <<FK>>
+ * aluno_id : INTEGER <<FK>>
+ * valor : INTEGER
+ * motivo : TEXT
+ * data_hora : TEXT
+}
+entity creditos {
+ * id : INTEGER <<PK>>
+ --
+ * professor_id : INTEGER <<FK>>
+ * semestre : TEXT
+ * valor : INTEGER
+ * data_hora : TEXT
+}
+entity resgates {
+ * id : INTEGER <<PK>>
+ --
+ * aluno_id : INTEGER <<FK>>
+ * vantagem_id : INTEGER <<FK>>
+ * valor : INTEGER
+ * codigo : TEXT <<UNIQUE>>
+ * data_hora : TEXT
+}
+entity notificacoes {
+ * id : INTEGER <<PK>>
+ --
+ * conta_id : INTEGER <<FK>>
+ * destinatario : TEXT
+ * assunto : TEXT
+ * mensagem : TEXT
+ * enviado : INTEGER
+ * data_hora : TEXT
+}
+instituicoes |o--o{ contas
+contas ||--o{ vantagens : empresa
+contas ||--o{ transferencias : professor
+contas ||--o{ transferencias : aluno
+contas ||--o{ creditos
+contas ||--o{ resgates
+vantagens ||--o{ resgates
+contas ||--o{ notificacoes
+note bottom of contas
+Instituição obrigatória para aluno/professor.
+Perfil restringe os subtipos na aplicação.
+CHECK saldo >= 0.
+end note
+note bottom of creditos
+UNIQUE(professor_id, semestre)
+CHECK valor = 1000
+end note
+@enduml

@@ -1,0 +1,92 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam ArrowColor #21655F
+skinparam packageStyle rectangle
+
+title Modelo conceitual de domínio e correspondência de implementação
+abstract class ContaAcesso {
+ id: Integer
+ nome: String
+ email: String {único, login}
+ senhaHash: String
+ documento: String {único}
+ endereco: String
+ ativo: Boolean
+}
+class Aluno {
+ rg: String
+ curso: String
+ saldo: Integer
+}
+class Professor {
+ departamento: String
+ saldo: Integer
+}
+class EmpresaParceira {
+ telefone: String
+}
+class InstituicaoEnsino {
+ id: Integer
+ nome: String
+}
+class TransferenciaMoedas {
+ id: Integer
+ valor: Integer
+ motivo: String
+ dataHora: DateTime
+}
+class CreditoSemestral {
+ id: Integer
+ semestre: String
+ valor: Integer = 1000
+ dataHora: DateTime
+}
+class Vantagem {
+ id: Integer
+ descricao: String
+ fotoUrl: String
+ custo: Integer
+ ativo: Boolean
+}
+class Resgate {
+ id: Integer
+ valor: Integer {histórico}
+ codigo: String {único}
+ dataHora: DateTime
+}
+class Notificacao {
+ id: Integer
+ destinatario: String
+ assunto: String
+ mensagem: String
+ enviado: Boolean
+ dataHora: DateTime
+}
+ContaAcesso <|-- Aluno
+ContaAcesso <|-- Professor
+ContaAcesso <|-- EmpresaParceira
+InstituicaoEnsino "1" -- "0..*" Aluno
+InstituicaoEnsino "1" -- "0..*" Professor
+Professor "1" -- "0..*" TransferenciaMoedas : envia
+Aluno "1" -- "0..*" TransferenciaMoedas : recebe
+Professor "1" -- "0..*" CreditoSemestral
+EmpresaParceira "1" -- "0..*" Vantagem : oferece
+Aluno "1" -- "0..*" Resgate
+Vantagem "1" -- "0..*" Resgate
+ContaAcesso "1" -- "0..*" Notificacao
+note bottom of CreditoSemestral
+Único por professor e semestre.
+Adiciona ao saldo anterior.
+end note
+note top of ContaAcesso
+Subtipos persistidos em contas.perfil.
+Python usa registros SQLite + ContaDAO.
+Operações em services.py; não há
+classes Python para cada entidade.
+end note
+@enduml

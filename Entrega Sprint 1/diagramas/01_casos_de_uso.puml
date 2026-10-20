@@ -1,0 +1,67 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam ArrowColor #21655F
+skinparam packageStyle rectangle
+
+left to right direction
+title Sistema de Moeda Estudantil - Casos de uso revisados
+actor Aluno
+actor Professor
+actor "Empresa parceira" as Empresa
+actor "Operador institucional" as Operador
+actor "Servidor SMTP" as SMTP
+rectangle "Sistema de Moeda Estudantil" {
+ usecase "Autenticar usuário" as Login
+ usecase "Cadastrar aluno" as CA
+ usecase "Consultar, alterar e\nexcluir próprio cadastro" as CRUD
+ usecase "Cadastrar empresa" as CE
+ usecase "Consultar saldo e extrato" as Extrato
+ usecase "Enviar moedas\ncom motivo" as Envio
+ usecase "Registrar notificação\nde recebimento" as NReceb
+ usecase "Consultar vantagens" as Catalogo
+ usecase "Gerenciar próprias\nvantagens" as GV
+ usecase "Resgatar vantagem" as Resgate
+ usecase "Gerar código de cupom" as Cupom
+ usecase "Registrar cupom para\naluno e empresa" as NCupom
+ usecase "Consultar notificações" as CN
+ usecase "Pré-cadastrar instituição\ne professor (carga local)" as Carga
+ usecase "Creditar 1.000 moedas\npor semestre" as Credito
+ usecase "Processar caixa de saída" as Emails
+}
+Aluno --> Login
+Professor --> Login
+Empresa --> Login
+Aluno --> CA
+Aluno --> CRUD
+Empresa --> CE
+Empresa --> CRUD
+Aluno --> Extrato
+Professor --> Extrato
+Professor --> Envio
+Envio ..> NReceb : <<include>>
+Aluno --> Catalogo
+Empresa --> GV
+Aluno --> Resgate
+Resgate ..> Cupom : <<include>>
+Resgate ..> NCupom : <<include>>
+Aluno --> CN
+Empresa --> CN
+Professor --> CN
+Operador --> Carga
+Operador --> Credito
+Operador --> Emails
+SMTP --> Emails
+note bottom of Login
+Autenticação é precondição das operações privadas.
+Cadastro inicial e login são públicos.
+end note
+note bottom of Emails
+Envio assíncrono por comando local.
+Sem SMTP, mensagens permanecem pendentes.
+end note
+@enduml
