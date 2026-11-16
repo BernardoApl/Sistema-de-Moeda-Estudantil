@@ -6,9 +6,13 @@ from flask import current_app, g
 
 def db():
     if 'db' not in g:
-        g.db = sqlite3.connect(current_app.config['DATABASE'], timeout=15)
-        g.db.row_factory = sqlite3.Row
-        g.db.execute('PRAGMA foreign_keys = ON')
+        if current_app.config.get('DATABASE_URL'):
+            from postgres_db import Postgres
+            g.db = Postgres(current_app.config['DATABASE_URL'])
+        else:
+            g.db = sqlite3.connect(current_app.config['DATABASE'], timeout=15)
+            g.db.row_factory = sqlite3.Row
+            g.db.execute('PRAGMA foreign_keys = ON')
     return g.db
 
 

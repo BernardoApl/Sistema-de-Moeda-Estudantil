@@ -8,6 +8,7 @@ from models import close_db, init_db
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config.update(SECRET_KEY=os.environ.get('SECRET_KEY') or secrets.token_hex(32),
+                      DATABASE_URL=os.environ.get('DATABASE_URL'),
                       DATABASE=str(Path(__file__).with_name('sistema.sqlite3')),
                       SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax', MAX_CONTENT_LENGTH=16384)
     if test_config:
@@ -17,10 +18,14 @@ def create_app(test_config=None):
     app.register_blueprint(routes)
     from commands import register_commands
     register_commands(app)
-    with app.app_context():
-        init_db()
+    if not app.config['DATABASE_URL']:
+        with app.app_context():
+            init_db()
     return app
 
+
+if os.environ.get('VERCEL'):
+    app = create_app()
 
 if __name__ == '__main__':
     create_app().run(host='127.0.0.1', port=5000)
