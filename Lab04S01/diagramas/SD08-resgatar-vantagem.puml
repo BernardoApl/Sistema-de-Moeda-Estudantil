@@ -1,0 +1,39 @@
+@startuml
+mainframe <b>sd</b> SD08 — Resgatar vantagem e gerar cupom
+hide footbox
+actor Aluno as A
+boundary Navegador as B
+control "controllers.py" as C
+participant "services.py" as S
+participant ContaDAO as DAO
+database SQLite as DB
+
+A -> B : escolhe uma vantagem disponível
+B -> C : POST /vantagens/{id}/resgatar
+C -> C : valida sessão, CSRF e perfil aluno
+C -> S : resgatar(aluno_id, vantagem_id)
+S -> DB : BEGIN IMMEDIATE
+S -> DAO : obter aluno ativo
+DAO -> DB : consulta conta
+DB --> DAO : conta ou ausência
+DAO --> S : dados da conta
+S -> DB : consulta custo da vantagem e empresa ativas
+DB --> S : vantagem ou ausência
+alt saldo insuficiente ou resgate inválido
+  S -> DB : ROLLBACK
+  S --> C : motivo da rejeição
+else saldo suficiente e vantagem ativa
+  S -> S : gera código do cupom
+  S -> DB : debita saldo e registra resgate com custo e código
+  S -> DB : insere notificação de cupom para o aluno
+  S -> DAO : obter empresa parceira
+  DAO -> DB : consulta empresa ativa
+  DB --> DAO : dados da empresa
+  DAO --> S : empresa destinatária
+  S -> DB : insere notificação para a empresa com o mesmo código
+  S -> DB : COMMIT
+  S --> C : código do cupom
+end
+C --> B : redirecionamento para / com cupom ou erro
+B --> A : exibe resultado
+@enduml

@@ -1,0 +1,67 @@
+@startdot
+digraph Interacoes {
+  graph [bgcolor="white", fontname="Arial", fontsize=16, labelloc=t,
+         labeljust=l, color="#2c4652", pad=0.18, margin=0,
+         nodesep=0.22, ranksep=0.36];
+  node [fontname="Arial", fontsize=12, color="#2c4652", fontcolor="#18343e"];
+  edge [fontname="Arial", fontsize=10, color="#365661", fontcolor="#18343e", arrowsize=0.65];
+
+  subgraph cluster_interacao {
+    label=<<B>sd</B>&#160;IOD01 · Sistema de Moeda Estudantil>;
+    margin=18;
+    inicio [shape=circle, width=0.17, fixedsize=true, label="", style=filled, fillcolor="#18343e"];
+    fim [shape=doublecircle, width=0.22, fixedsize=true, label="", style=filled, fillcolor="#18343e"];
+
+    node [shape=diamond, width=0.25, height=0.22, fixedsize=true, label=""];
+    modo; cadastro; cadastrado; acesso; sessao; web; local; saida;
+
+    node [shape=plain, fixedsize=false];
+    SD01 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD01 · Autenticar usuário</TD></TR></TABLE>>];
+    SD02a [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD02 · Cadastro inicial</TD></TR></TABLE>>];
+    SD02b [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD02 · Gerenciar<BR/>o próprio perfil</TD></TR></TABLE>>];
+    SD03 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD03 · Pré-cadastrar<BR/>professor</TD></TR></TABLE>>];
+    SD04 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD04 · Aplicar<BR/>crédito semestral</TD></TR></TABLE>>];
+    SD05 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD05 · Enviar moedas<BR/>com motivo</TD></TR></TABLE>>];
+    SD06 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD06 · Consultar painel<BR/>(saldo, extrato e catálogo)</TD></TR></TABLE>>];
+    SD07 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD07 · Gerenciar<BR/>vantagens</TD></TR></TABLE>>];
+    SD08 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD08 · Resgatar vantagem<BR/>e gerar cupom</TD></TR></TABLE>>];
+    SD09 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD09 · Consultar<BR/>notificações</TD></TR></TABLE>>];
+    SD10 [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#2c4652" BGCOLOR="#eef8f8"><TR><TD BORDER="1" SIDES="BR"><B>ref</B></TD><TD></TD></TR><TR><TD COLSPAN="2">SD10 · Enviar<BR/>e-mails pendentes</TD></TR></TABLE>>];
+
+    inicio -> modo;
+    modo -> cadastro [label="[acesso web]"];
+    modo -> local [label="[operação institucional]"];
+    cadastro -> SD02a [label="[cadastrar aluno ou empresa]"];
+    cadastro -> acesso [label="[já possui conta]"];
+    SD02a -> cadastrado;
+    cadastrado -> acesso [label="[cadastro concluído]"];
+    cadastrado -> saida [label="[cadastro recusado]"];
+    acesso -> SD01 -> sessao;
+    sessao -> SD06 [label="[sessão criada]"];
+    sessao -> saida [label="[login recusado]"];
+    SD06 -> web;
+    web -> SD05 [label="[professor: enviar]"];
+    web -> SD08 [label="[aluno: resgatar]"];
+    web -> SD07 [label="[empresa: gerir vantagens]"];
+    web -> SD02b [label="[aluno ou empresa: perfil]"];
+    web -> SD09 [label="[abrir notificações]"];
+    web -> saida [label="[somente consulta]"];
+    SD05 -> saida;
+    SD08 -> saida;
+    SD07 -> saida;
+    SD02b -> saida;
+    SD09 -> saida;
+    local -> SD03 [label="[pré-cadastro]"];
+    local -> SD04 [label="[crédito do semestre]"];
+    local -> SD10 [label="[processar caixa de saída]"];
+    SD03 -> saida;
+    SD04 -> saida;
+    SD10 -> saida;
+    saida -> fim;
+
+    {rank=same; cadastro; local;}
+    {rank=same; SD02a; SD03; SD04; SD10;}
+    {rank=same; SD05; SD08; SD07; SD02b; SD09;}
+  }
+}
+@enddot

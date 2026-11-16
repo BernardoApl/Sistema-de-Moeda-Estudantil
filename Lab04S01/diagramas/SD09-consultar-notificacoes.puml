@@ -1,0 +1,19 @@
+@startuml
+mainframe <b>sd</b> SD09 — Consultar notificações da própria conta
+hide footbox
+actor "Aluno / Professor / Empresa" as U
+boundary Navegador as B
+control "controllers.py" as C
+database SQLite as DB
+boundary "notificacoes.html (Jinja)" as V
+
+U -> B : abre Notificações
+B -> C : GET /notificacoes
+C -> C : valida a sessão e identifica a conta
+C -> DB : consulta notificações por conta_id da sessão
+DB --> C : avisos da conta, pendentes ou enviados
+C -> V : renderiza avisos e estado de envio
+V --> C : HTML de notificações
+C --> B : resposta HTTP
+B --> U : apresenta os avisos, incluindo cupons quando houver
+@enduml

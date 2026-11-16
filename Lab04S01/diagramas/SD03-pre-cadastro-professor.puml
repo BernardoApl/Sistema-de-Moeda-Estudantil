@@ -1,0 +1,34 @@
+@startuml
+mainframe <b>sd</b> SD03 — Pré-cadastrar professor e vincular instituição
+hide footbox
+actor "Operador institucional" as O
+control "commands.py" as CLI
+participant "services.py" as S
+database SQLite as DB
+
+O -> CLI : flask --app app cadastrar-professor
+CLI --> O : solicita dados da lista e senha inicial
+O -> CLI : nome, e-mail, CPF, departamento, instituição e senha
+CLI -> S : cadastrar_professor(dados, senha)
+S -> S : normaliza e valida os campos
+alt dados inválidos
+  S --> CLI : erro de validação
+  CLI --> O : informa o erro
+else dados válidos
+  S -> S : gera hash da senha inicial
+  group Transação SQLite
+    S -> DB : cria ou reutiliza instituição pelo nome
+    S -> DB : insere conta professor vinculada à instituição
+    alt e-mail e CPF disponíveis
+      S -> DB : COMMIT
+      S --> CLI : cadastro concluído
+      CLI --> O : confirma vínculo institucional
+    else e-mail ou CPF duplicado
+      DB --> S : violação de unicidade
+      S -> DB : ROLLBACK
+      S --> CLI : erro de duplicidade
+      CLI --> O : informa o erro
+    end
+  end
+end
+@enduml

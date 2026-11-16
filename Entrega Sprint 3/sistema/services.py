@@ -6,6 +6,18 @@ from werkzeug.security import generate_password_hash
 from models import db, ContaDAO
 
 
+def documento_valido(numero, perfil):
+    tamanho = 11 if perfil in ('aluno', 'professor') else 14
+    if len(numero) != tamanho or len(set(numero)) == 1:
+        return False
+    base = numero[:-2]
+    for etapa in range(2):
+        pesos = list(range(len(base) + 1, 1, -1)) if tamanho == 11 else ([5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] if etapa == 0 else [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+        resto = sum(int(d) * p for d, p in zip(base, pesos)) % 11
+        base += str(0 if resto < 2 else 11 - resto)
+    return base == numero
+
+
 def positivo(value):
     try:
         if not re.fullmatch(r'[0-9]+', str(value)):
@@ -29,8 +41,8 @@ def salvar_conta(data, perfil, id=None):
         raise ValueError('Informe um e-mail válido.')
     values['email'] = values['email'].lower()
     values['documento'] = re.sub(r'\D', '', values['documento'])
-    if len(values['documento']) != (11 if perfil == 'aluno' else 14):
-        raise ValueError('CPF deve ter 11 dígitos; CNPJ deve ter 14 dígitos.')
+    if not documento_valido(values['documento'], perfil):
+        raise ValueError('Informe um CPF válido.' if perfil == 'aluno' else 'Informe um CNPJ válido.')
     instituicao = data.get('instituicao_id') if perfil == 'aluno' else None
     if perfil == 'aluno' and not db().execute('SELECT id FROM instituicoes WHERE id=?', (instituicao,)).fetchone():
         raise ValueError('Selecione uma instituição cadastrada.')
@@ -51,6 +63,33 @@ def salvar_conta(data, perfil, id=None):
         return id
     except sqlite3.IntegrityError:
         raise ValueError('E-mail ou documento já cadastrado.')
+
+
+def cadastrar_professor(nome, email, cpf, departamento, instituicao, senha):
+    nome, email, departamento, instituicao = (
+        campo.strip() for campo in (nome, email, departamento, instituicao)
+    )
+    if any(not campo or len(campo) > 250 for campo in (nome, email, departamento, instituicao)):
+        raise ValueError('Preencha os campos obrigatórios com até 250 caracteres.')
+    if not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email):
+        raise ValueError('Informe um e-mail válido.')
+    cpf = re.sub(r'\D', '', cpf)
+    if not documento_valido(cpf, 'professor'):
+        raise ValueError('Informe um CPF válido.')
+    if len(senha) < 8:
+        raise ValueError('A senha deve ter pelo menos 8 caracteres.')
+
+    senha_hash = generate_password_hash(senha)
+    conexao = db()
+    try:
+        with conexao:
+            conexao.execute('INSERT OR IGNORE INTO instituicoes(nome) VALUES(?)', (instituicao,))
+            conexao.execute('''
+                INSERT INTO contas(perfil, nome, email, documento, senha_hash, departamento, instituicao_id)
+                VALUES('professor', ?, ?, ?, ?, ?, (SELECT id FROM instituicoes WHERE nome=?))
+            ''', (nome, email.lower(), cpf, senha_hash, departamento, instituicao))
+    except sqlite3.IntegrityError as erro:
+        raise ValueError('E-mail ou documento já cadastrado.') from erro
 
 
 def notificar(conta, assunto, mensagem):
@@ -127,3 +166,12 @@ def excluir_conta(id):
     with db():
         db().execute('UPDATE contas SET ativo=0 WHERE id=?', (id,))
         db().execute('UPDATE vantagens SET ativo=0 WHERE empresa_id=?', (id,))
+
+
+def utilizar_cupom(empresa_id, resgate_id):
+    with db():
+        result = db().execute('''UPDATE resgates SET utilizado_em=CURRENT_TIMESTAMP
+            WHERE id=? AND utilizado_em IS NULL AND vantagem_id IN
+            (SELECT id FROM vantagens WHERE empresa_id=?)''', (resgate_id, empresa_id))
+        if not result.rowcount:
+            raise ValueError('Cupom não encontrado ou já utilizado.')

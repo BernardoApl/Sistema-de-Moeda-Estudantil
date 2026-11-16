@@ -29,6 +29,6 @@ Os modelos possuem fontes `.puml` e imagens `.svg`/`.png`. Abra [apresentacao.ht
 
 ## Validação e limites
 
-Foram aprovados **5 testes na sprint 2 e 22 testes na sprint 3**, além do fluxo no Chrome em desktop e celular. Consulte o [relatório](<Entrega Sprint 3/03_validacao.md>).
+Foram aprovados **5 testes na sprint 2 e 25 testes na sprint 3**, além do fluxo no Chrome em desktop e celular. Consulte o [relatório](<Entrega Sprint 3/03_validacao.md>).
 
 O envio real de e-mails requer configuração SMTP; foi validado com simulação, sem envio externo. Os arquivos estão preparados localmente; publicação no GitHub, submissão à disciplina e apresentação em aula não foram realizadas. As versões foram organizadas em 20/10/2026, sem atribuir datas fictícias de entregas anteriores.

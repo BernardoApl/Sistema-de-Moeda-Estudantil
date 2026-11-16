@@ -6,10 +6,25 @@ from email.message import EmailMessage
 import click
 from werkzeug.security import generate_password_hash
 from models import db
-from services import creditar_semestre
+from services import cadastrar_professor, creditar_semestre
 
 
 def register_commands(app):
+    @app.cli.command('cadastrar-professor')
+    def cadastrar():
+        """Cadastra um professor da lista institucional e vincula sua instituição."""
+        nome = click.prompt('Nome do professor')
+        email = click.prompt('E-mail')
+        cpf = click.prompt('CPF')
+        departamento = click.prompt('Departamento')
+        instituicao = click.prompt('Instituição de ensino')
+        senha = click.prompt('Senha inicial', hide_input=True, confirmation_prompt='Confirme a senha')
+        try:
+            cadastrar_professor(nome, email, cpf, departamento, instituicao, senha)
+        except ValueError as erro:
+            raise click.ClickException(str(erro)) from erro
+        click.echo('Professor cadastrado e vinculado à instituição.')
+
     @app.cli.command('seed-demo')
     def seed_demo():
         """Cria contas fictícias para demonstração, sem sobrescrever dados."""

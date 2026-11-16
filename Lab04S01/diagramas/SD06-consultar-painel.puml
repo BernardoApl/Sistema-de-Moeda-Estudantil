@@ -1,0 +1,41 @@
+@startuml
+mainframe <b>sd</b> SD06 — Consultar saldo, extrato e catálogo
+hide footbox
+actor "Aluno / Professor / Empresa" as U
+boundary Navegador as B
+control "controllers.py" as C
+participant "models.py" as M
+database SQLite as DB
+boundary "index.html (Jinja)" as V
+
+U -> B : abre o painel autenticado
+B -> C : GET /
+C -> M : ContaDAO.obter(id da sessão)
+M -> DB : consulta conta ativa e saldo
+DB --> M : dados da conta
+M --> C : conta autenticada
+C -> M : extrato(id)
+M -> DB : consulta movimentações da conta
+DB --> M : lançamentos
+M --> C : extrato
+opt perfil professor
+  C -> M : ContaDAO.alunos(instituição)
+  M -> DB : consulta alunos ativos da instituição
+  DB --> M : alunos elegíveis
+  M --> C : alunos para envio
+end
+C -> M : VantagemDAO.listar(filtro)
+M -> DB : consulta vantagens ativas de empresas ativas
+DB --> M : vantagens disponíveis
+M --> C : vantagens (filtradas por empresa quando aplicável)
+C -> V : renderiza dados conforme o perfil
+alt aluno
+  V --> C : saldo, extrato e catálogo
+else professor
+  V --> C : saldo, extrato e formulário de envio
+else empresa
+  V --> C : vantagens da própria empresa
+end
+C --> B : HTML do painel
+B --> U : exibe dados do perfil
+@enduml

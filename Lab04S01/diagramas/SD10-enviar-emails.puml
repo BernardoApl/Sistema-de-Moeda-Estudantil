@@ -1,0 +1,32 @@
+@startuml
+mainframe <b>sd</b> SD10 — Processar e-mails pendentes
+hide footbox
+actor "Operador institucional" as O
+control "commands.py" as CLI
+database SQLite as DB
+participant "Servidor SMTP" as SMTP
+
+O -> CLI : flask --app app enviar-emails
+CLI -> CLI : lê configuração SMTP
+alt configuração incompleta
+  CLI --> O : erro de configuração
+else configuração presente
+  CLI -> SMTP : abre conexão, negocia STARTTLS e autentica
+  SMTP --> CLI : sessão SMTP estabelecida
+  CLI -> DB : SELECT notificações WHERE enviado = 0
+  DB --> CLI : pendências por ordem de ID
+  loop para cada notificação pendente
+    CLI -> SMTP : send_message(mensagem)
+    alt servidor aceita a mensagem
+      SMTP --> CLI : confirmação SMTP
+      CLI -> DB : marca enviado = 1 e confirma alteração
+      CLI --> O : informa envio da notificação
+    else SMTP falha durante o envio
+      SMTP --> CLI : erro de envio
+      break comando interrompido
+        CLI --> O : falha. A notificação permanece pendente
+      end
+    end
+  end
+end
+@enduml

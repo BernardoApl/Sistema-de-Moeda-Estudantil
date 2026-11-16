@@ -1,0 +1,51 @@
+@startuml
+mainframe <b>sd</b> SD02 — Cadastrar e gerenciar o próprio perfil
+hide footbox
+actor "Aluno / Empresa" as U
+boundary Navegador as B
+control "controllers.py" as C
+participant "services.py" as S
+database SQLite as DB
+
+alt cadastro público de aluno ou empresa
+  U -> B : abre o cadastro
+  B -> C : GET /cadastro/{perfil}
+  C -> DB : consulta instituições cadastradas
+  DB --> C : instituições
+  C --> B : formulário de cadastro
+  U -> B : preenche e confirma os dados
+  B -> C : POST /cadastro/{perfil}
+  C -> S : salvar_conta(dados, perfil)
+  S -> S : valida campos e gera hash da senha
+  S -> DB : insere conta (instituição válida para aluno)
+  DB --> S : ID ou erro de duplicidade
+  S --> C : resultado do cadastro
+  C --> B : redireciona para login ou exibe erro
+else consulta do próprio perfil com sessão
+  U -> B : solicita os próprios dados
+  B -> C : GET /perfil
+  C --> B : formulário com os dados da conta da sessão
+else alteração do próprio perfil com sessão
+  U -> B : edita e confirma dados
+  B -> C : POST /perfil
+  C -> S : salvar_conta(dados, perfil, id da sessão)
+  S -> DB : valida instituição quando aplicável e atualiza conta
+  DB --> S : resultado da atualização
+  S --> C : resultado
+  C --> B : redireciona para o perfil ou exibe erro
+else desativação do próprio perfil com sessão
+  U -> B : confirma a exclusão com senha
+  B -> C : POST /perfil/excluir
+  C -> C : verifica a senha
+  alt senha correta
+    C -> S : excluir_conta(id da sessão)
+    S -> DB : desativa conta e vantagens vinculadas
+    DB --> S : confirma gravação
+    S --> C : conclui desativação
+    C -> C : encerra sessão
+    C --> B : redireciona para login
+  else senha incorreta
+    C --> B : redireciona ao perfil com erro
+  end
+end
+@enduml

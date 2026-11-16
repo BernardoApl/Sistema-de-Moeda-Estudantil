@@ -1,38 +1,46 @@
-# Entrega Sprint 3 — Lab03S03
-
-## Conteúdo
-
-- `sistema/`: versão final dos CRUDs e protótipo funcional de moedas, vantagens e resgates.
-- `01_arquitetura_e_persistencia.md`: arquitetura MVC e correspondência entre modelo/código.
-- `02_tutorial_e_roteiro.md`: instalação, tecnologias, demonstração e roteiro de 20 minutos.
-- `03_validacao.md`: testes executados, critérios de aceite e limites.
-- `apresentacao.html`: slides locais, abertos diretamente no navegador, com navegação por setas e impressão.
-
-## Início rápido (PowerShell)
-
-```powershell
 cd "Entrega Sprint 3/sistema"
+
 python -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-.venv\Scripts\python.exe -m flask --app app seed-demo
-.venv\Scripts\python.exe -m flask --app app creditar-semestre 2026-2
-.venv\Scripts\python.exe app.py
-```
 
-Acesse **http://127.0.0.1:5000**. Contas fictícias:
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
+.\.venv\Scripts\python.exe -m flask --app app seed-demo
+
+.\.venv\Scripts\python.exe -m flask --app app creditar-semestre 2026-2
+
+.\.venv\Scripts\python.exe app.py
+
+Senhas:
 | Perfil | E-mail | Senha |
 |---|---|---|
 | Professor | professor@demo.local | Demo12345! |
 | Aluno | aluno@demo.local | Demo12345! |
 | Empresa | empresa@demo.local | Demo12345! |
 
-Para executar testes:
+Para cadastrar um professor da instituição, execute dentro de `Entrega Sprint 3/sistema`:
 
 ```powershell
-.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m flask --app app cadastrar-professor
 ```
 
-SMTP é opcional para executar o protótipo. As notificações ficam disponíveis na interface e persistidas no banco; o envio real requer as variáveis descritas no tutorial. Não publique o ambiente com contas demo. A aplicação se vincula somente a `127.0.0.1`.
+O comando solicita os dados e a senha inicial sem exibi-la. Depois, o professor pode acessar o sistema com o e-mail e a senha cadastrados. Para conceder moedas, execute o comando `creditar-semestre` com o semestre desejado.
 
-Os diagramas finais estão em `../Entrega Sprint 1/diagramas` e o ER em `../Entrega Sprint 2/diagramas`. As três pastas compõem a entrega completa. Apresentação em aula e publicação no GitHub não estão realizadas por estes arquivos.
+
+### Cupons e documentos
+
+CPF e CNPJ informados em novos cadastros ou altera??es s?o validados pelos d?gitos verificadores. Na ?rea da empresa, confira o c?digo apresentado pelo aluno e marque o cupom correspondente como utilizado. A data ? registrada e apenas a empresa respons?vel pela vantagem pode efetuar a marca??o.
+
+### Envio de e-mails
+
+Configure as vari?veis de ambiente do provedor SMTP com STARTTLS e execute um ?nico processo de envio:
+
+```powershell
+$env:SMTP_HOST = "smtp.seu-provedor.com"
+$env:SMTP_PORT = "587"
+$env:SMTP_USER = "usuario"
+$env:SMTP_PASSWORD = "senha-ou-senha-de-aplicativo"
+$env:SMTP_FROM = "remetente@exemplo.com"
+.\.venv\Scripts\python.exe -m flask --app app enviar-emails
+```
+
+Use credenciais reais apenas no ambiente local e n?o as inclua no reposit?rio. O envio real depende de um provedor configurado; a su?te usa SMTP simulado.

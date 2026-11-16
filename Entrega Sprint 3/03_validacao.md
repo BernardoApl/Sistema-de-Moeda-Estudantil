@@ -71,3 +71,7 @@ HU01–HU05: testes de CRUD/login/autorização. HU06: crédito idempotente. HU0
 - Foto por URL HTTP(S), sem upload.
 - Snapshot S2 compartilha esquema e infraestrutura previstos para S3, mas expõe somente autenticação e CRUDs.
 - Não há evidência de apresentação semanal, publicação no GitHub ou submissão acadêmica.
+
+## Atualiza??o posterior
+
+A su?te foi ampliada para 25 testes, incluindo pr?-cadastro institucional, valida??o de documentos e marca??o de cupons com verifica??o de propriedade e preven??o de uso repetido. O teste SMTP continua simulado.

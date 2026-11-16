@@ -1,0 +1,37 @@
+@startuml
+mainframe <b>sd</b> SD07 — Gerenciar vantagens da empresa parceira
+hide footbox
+actor "Empresa parceira" as E
+boundary Navegador as B
+control "controllers.py" as C
+participant "services.py" as S
+database SQLite as DB
+
+E -> B : escolhe cadastrar, editar ou desativar
+alt cadastrar ou editar
+  B -> C : GET /vantagens/nova ou /vantagens/{id}/editar
+  opt edição
+    C -> DB : consulta vantagem ativa da própria empresa
+    DB --> C : dados ou ausência
+  end
+  C --> B : formulário autorizado ou 404
+  opt formulário disponível e confirmado
+    B -> C : POST na rota correspondente
+    C -> S : salvar_vantagem(empresa, dados, id opcional)
+    S -> S : valida descrição, URL da foto e custo inteiro
+    alt dados válidos
+      S -> DB : insere ou atualiza vantagem da própria empresa
+      DB --> S : resultado da gravação
+      S --> C : resultado
+    else dados inválidos
+      S --> C : erro de validação
+    end
+    C --> B : redireciona ou exibe erro
+  end
+else desativar
+  B -> C : POST /vantagens/{id}/excluir
+  C -> DB : define ativo=0 se empresa_id corresponde à sessão
+  DB --> C : quantidade de linhas afetadas
+  C --> B : redireciona se encontrou vantagem ou retorna 404
+end
+@enduml

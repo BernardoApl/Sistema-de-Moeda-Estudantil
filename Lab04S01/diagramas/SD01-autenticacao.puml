@@ -1,0 +1,28 @@
+@startuml
+mainframe <b>sd</b> SD01 — Autenticar usuário
+hide footbox
+actor "Aluno / Professor / Empresa" as U
+boundary "Navegador" as B
+control "controllers.py" as C
+participant "ContaDAO" as DAO
+database SQLite as DB
+
+U -> B : abre a tela de login
+B -> C : GET /login
+C --> B : formulário com token CSRF
+U -> B : informa e-mail e senha
+B -> C : POST /login
+C -> DAO : por_email(email)
+DAO -> DB : consulta conta ativa pelo e-mail
+DB --> DAO : conta ou ausência
+DAO --> C : conta ou ausência
+C -> C : verifica a senha contra o hash
+alt conta ativa e senha correta
+  C -> C : renova sessão e grava conta_id
+  C --> B : redirecionamento para /
+  B --> U : sessão autenticada
+else credenciais inválidas
+  C --> B : formulário com mensagem de erro
+  B --> U : solicita nova tentativa
+end
+@enduml

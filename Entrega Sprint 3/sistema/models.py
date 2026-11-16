@@ -21,6 +21,8 @@ def close_db(error=None):
 def init_db():
     db().executescript(Path(__file__).with_name('schema.sql').read_text(encoding='utf-8'))
     with db():
+        if 'utilizado_em' not in {col['name'] for col in db().execute('PRAGMA table_info(resgates)')}:
+            db().execute('ALTER TABLE resgates ADD COLUMN utilizado_em TEXT')
         db().execute("INSERT OR IGNORE INTO instituicoes(id,nome) VALUES(1,'PUC Minas')")
 
 

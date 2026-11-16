@@ -1,0 +1,28 @@
+@startuml
+mainframe <b>sd</b> SD04 — Aplicar crédito semestral
+hide footbox
+actor "Operador institucional" as O
+control "commands.py" as CLI
+participant "services.py" as S
+database SQLite as DB
+
+O -> CLI : flask --app app creditar-semestre AAAA-N
+CLI -> S : creditar_semestre(semestre)
+alt semestre inválido
+  S --> CLI : erro de validação
+  CLI --> O : informa formato esperado
+else semestre válido
+  S -> DB : BEGIN IMMEDIATE e consulta professores ativos
+  DB --> S : lista de professores ativos
+  loop para cada professor ativo
+    S -> DB : INSERT OR IGNORE em creditos (professor, semestre)
+    DB --> S : quantidade de linhas inseridas
+    opt novo crédito para o professor e o semestre
+      S -> DB : soma 1.000 moedas ao saldo atual
+    end
+  end
+  S -> DB : COMMIT
+  S --> CLI : quantidade de professores creditados
+  CLI --> O : apresenta o total
+end
+@enduml

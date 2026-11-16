@@ -1,0 +1,38 @@
+@startuml
+mainframe <b>sd</b> SD05 — Enviar moedas com motivo
+hide footbox
+actor Professor as P
+boundary Navegador as B
+control "controllers.py" as C
+participant "services.py" as S
+participant ContaDAO as DAO
+database SQLite as DB
+
+P -> B : seleciona aluno, quantidade e motivo
+B -> C : POST /transferir
+C -> C : valida sessão, CSRF e perfil professor
+C -> S : transferir(professor_id, aluno_id, valor, motivo)
+S -> S : valida quantidade e motivo
+alt quantidade ou motivo inválido
+  S --> C : erro de validação
+else entrada válida
+  S -> DB : BEGIN IMMEDIATE
+  S -> DAO : obter professor e aluno ativos
+  DAO -> DB : consulta as duas contas
+  DB --> DAO : registros encontrados
+  DAO --> S : dados das contas
+  alt perfis, instituição ou saldo inválidos
+    S -> DB : ROLLBACK
+    S --> C : motivo da rejeição
+  else aluno elegível e saldo suficiente
+    S -> DB : debita professor e credita aluno
+    S -> DB : insere transferência com motivo
+    S -> S : notificar(aluno, assunto, mensagem)
+    S -> DB : insere aviso de recebimento pendente
+    S -> DB : COMMIT
+    S --> C : envio concluído
+  end
+end
+C --> B : redirecionamento para / com resultado
+B --> P : apresenta mensagem
+@enduml

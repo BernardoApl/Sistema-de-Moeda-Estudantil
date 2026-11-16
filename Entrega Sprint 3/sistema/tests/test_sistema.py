@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 from app import create_app
 from models import db, ContaDAO
-from services import salvar_conta, transferir, resgatar, creditar_semestre, salvar_vantagem, excluir_conta
+from services import salvar_conta, transferir, resgatar, creditar_semestre, salvar_vantagem, excluir_conta, documento_valido
 
 
 class SistemaTest(unittest.TestCase):
@@ -86,6 +86,33 @@ class SistemaTest(unittest.TestCase):
         salvar_vantagem(self.empresa,{'descricao':'Lanche novo','foto':'https://example.com/a.jpg','custo':'80'},id)
         self.assertEqual(db().execute('SELECT valor FROM resgates').fetchone()[0],50)
 
+    def test_documentos_verificadores(self):
+        for numero, perfil in [('52998224725', 'aluno'), ('11222333000181', 'empresa')]:
+            self.assertTrue(documento_valido(numero, perfil))
+            self.assertFalse(documento_valido(numero[:-1] + str((int(numero[-1]) + 1) % 10), perfil))
+        self.assertFalse(documento_valido('11111111111', 'professor'))
+
+    def test_cupom_usado_apenas_pela_empresa_dona(self):
+        vantagem = self.preparar_resgate()
+        codigo = resgatar(self.aluno, vantagem)
+        cupom = db().execute('SELECT id FROM resgates WHERE codigo=?', (codigo,)).fetchone()['id']
+        self.login('aluno')
+        self.assertEqual(self.post(f'/cupons/{cupom}/utilizar').status_code, 403)
+        self.post('/sair')
+        with db():
+            db().execute("INSERT INTO contas(perfil,nome,email,documento,senha_hash) VALUES('empresa','Outra','outra@demo.local','99888777000166',?)", (ContaDAO.obter(self.empresa)['senha_hash'],))
+        self.post('/login', {'email': 'outra@demo.local', 'senha': 'Demo12345!'})
+        self.assertIn('não encontrado ou já utilizado', self.post(f'/cupons/{cupom}/utilizar').text)
+        self.assertIsNone(db().execute('SELECT utilizado_em FROM resgates WHERE id=?', (cupom,)).fetchone()[0])
+        self.post('/sair')
+        self.login('empresa')
+        self.assertIn(codigo, self.client.get('/').text)
+        self.assertIn('Cupom marcado como utilizado', self.post(f'/cupons/{cupom}/utilizar').text)
+        data = db().execute('SELECT utilizado_em FROM resgates WHERE id=?', (cupom,)).fetchone()[0]
+        self.assertIsNotNone(data)
+        self.assertIn('não encontrado ou já utilizado', self.post(f'/cupons/{cupom}/utilizar').text)
+        self.assertEqual(db().execute('SELECT utilizado_em FROM resgates WHERE id=?', (cupom,)).fetchone()[0], data)
+
     def test_resgate_sem_saldo(self):
         salvar_vantagem(self.empresa,{'descricao':'Lanche','foto':'https://example.com/a.jpg','custo':'50'})
         with self.assertRaises(ValueError): resgatar(self.aluno,1)
@@ -99,7 +126,7 @@ class SistemaTest(unittest.TestCase):
         self.assertEqual(db().execute('SELECT count(*) FROM resgates').fetchone()[0],0)
 
     def test_crud_aluno_via_http(self):
-        dados = {'nome':'Novo Aluno','email':'novo@demo.local','documento':'12345678901','rg':'123','endereco':'Rua A','curso':'Software','instituicao_id':'1','senha':'Teste12345!'}
+        dados = {'nome':'Novo Aluno','email':'novo@demo.local','documento':'52998224725','rg':'123','endereco':'Rua A','curso':'Software','instituicao_id':'1','senha':'Teste12345!'}
         result = self.post('/cadastro/aluno',dados)
         self.assertIn('Cadastro concluído',result.text)
         self.post('/login',{'email':dados['email'],'senha':dados['senha']})
@@ -111,7 +138,7 @@ class SistemaTest(unittest.TestCase):
         self.assertIsNone(ContaDAO.por_email(dados['email']))
 
     def test_crud_empresa_via_http(self):
-        dados = {'nome':'Loja Nova','email':'nova@demo.local','documento':'12345678901234','endereco':'Rua B','telefone':'31999999999','senha':'Teste12345!'}
+        dados = {'nome':'Loja Nova','email':'nova@demo.local','documento':'11222333000181','endereco':'Rua B','telefone':'31999999999','senha':'Teste12345!'}
         self.assertIn('Cadastro concluído',self.post('/cadastro/empresa',dados).text)
         self.post('/login',{'email':dados['email'],'senha':dados['senha']})
         self.assertIn('Loja Nova',self.client.get('/perfil').text)
@@ -123,7 +150,7 @@ class SistemaTest(unittest.TestCase):
         conta = ContaDAO.obter(self.aluno)
         self.assertNotEqual(conta['senha_hash'],'Demo12345!')
         with self.assertRaises(ValueError):
-            salvar_conta({'nome':'Teste','email':conta['email'],'documento':'12345678901','rg':'1','endereco':'A','curso':'B','instituicao_id':'1','senha':'Teste12345!'},'aluno')
+            salvar_conta({'nome':'Teste','email':conta['email'],'documento':'52998224725','rg':'1','endereco':'A','curso':'B','instituicao_id':'1','senha':'Teste12345!'},'aluno')
 
     def test_csrf(self):
         self.assertEqual(self.client.post('/login',data={'email':'a'}).status_code,400)
@@ -135,6 +162,27 @@ class SistemaTest(unittest.TestCase):
 
     def test_login_invalido(self):
         self.assertIn('E-mail ou senha inválidos',self.post('/login',{'email':'aluno@demo.local','senha':'errada'}).text)
+
+    def test_precadastro_institucional_permite_login(self):
+        runner = self.app.test_cli_runner()
+        dados = 'Maria Silva\nMaria@example.org\n123.456.789-09\nComputação\n'
+        senha = 'SenhaInicial123!'
+        resultado = runner.invoke(args=['cadastrar-professor'], input=f'{dados}Instituição A\n{senha}\n{senha}\n')
+        self.assertEqual(resultado.exit_code, 0, resultado.output)
+        professor = ContaDAO.por_email('maria@example.org')
+        self.assertEqual(professor['perfil'], 'professor')
+        self.assertEqual(professor['documento'], '12345678909')
+        self.assertEqual(professor['departamento'], 'Computação')
+        self.assertNotEqual(professor['senha_hash'], senha)
+        instituicao = db().execute('SELECT nome FROM instituicoes WHERE id=?', (professor['instituicao_id'],)).fetchone()
+        self.assertEqual(instituicao['nome'], 'Instituição A')
+        login = self.post('/login', {'email': 'maria@example.org', 'senha': senha})
+        self.assertIn('Enviar moedas', login.text)
+
+        duplicado = runner.invoke(args=['cadastrar-professor'], input=f'{dados}Instituição B\n{senha}\n{senha}\n')
+        self.assertEqual(duplicado.exit_code, 1, duplicado.output)
+        self.assertIn('já cadastrado', duplicado.output)
+        self.assertIsNone(db().execute('SELECT id FROM instituicoes WHERE nome=?', ('Instituição B',)).fetchone())
 
     def test_privacidade_notificacoes(self):
         self.preparar_resgate()

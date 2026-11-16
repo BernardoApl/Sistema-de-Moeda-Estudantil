@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Blueprint, abort, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash
 from models import db, ContaDAO, VantagemDAO, extrato
-from services import salvar_conta, transferir, salvar_vantagem, resgatar, excluir_conta
+from services import salvar_conta, transferir, salvar_vantagem, resgatar, excluir_conta, utilizar_cupom
 
 routes = Blueprint('web', __name__)
 
@@ -89,7 +89,21 @@ def excluir():
 @routes.get('/')
 @acesso()
 def index():
-    return render_template('index.html', movimentos=extrato(g.conta['id']), alunos=ContaDAO.alunos(g.conta['instituicao_id']) if g.conta['perfil']=='professor' else [], vantagens=VantagemDAO.listar(g.conta['id'] if g.conta['perfil']=='empresa' else None))
+    cupons = db().execute('''SELECT r.id, r.codigo, r.utilizado_em, v.descricao, c.nome AS aluno
+        FROM resgates r JOIN vantagens v ON v.id=r.vantagem_id JOIN contas c ON c.id=r.aluno_id
+        WHERE v.empresa_id=? ORDER BY r.id DESC''', (g.conta['id'],)).fetchall() if g.conta['perfil']=='empresa' else []
+    return render_template('index.html', movimentos=extrato(g.conta['id']), alunos=ContaDAO.alunos(g.conta['instituicao_id']) if g.conta['perfil']=='professor' else [], vantagens=VantagemDAO.listar(g.conta['id'] if g.conta['perfil']=='empresa' else None), cupons=cupons)
+
+
+@routes.post('/cupons/<int:id>/utilizar')
+@acesso('empresa')
+def marcar_cupom(id):
+    try:
+        utilizar_cupom(g.conta['id'], id)
+        flash('Cupom marcado como utilizado.', 'sucesso')
+    except ValueError as error:
+        flash(str(error), 'erro')
+    return redirect(url_for('web.index'))
 
 
 @routes.post('/transferir')
