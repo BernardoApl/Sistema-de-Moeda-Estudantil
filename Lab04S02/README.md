@@ -1,6 +1,6 @@
 # Lab04S02 — Implantação
 
-O repositório contém a configuração Flask para Vercel e um adaptador PostgreSQL. O [diagrama de implantação em PlantUML](implantacao.puml) descreve a topologia pretendida; não comprova que os serviços estejam ativos. A aplicação também funciona localmente com SQLite, conforme o [guia de execução](../Entrega%20Sprint%203/README.md).
+O repositório contém a configuração Flask para Vercel e um adaptador PostgreSQL. O diagrama de implantação ([SVG](implantacao.svg), [PNG](implantacao.png), [fonte PlantUML](implantacao.puml)) descreve a topologia pretendida; não comprova que os serviços estejam ativos. A aplicação também funciona localmente com SQLite, conforme o [guia de execução](../Entrega%20Sprint%203/README.md).
 
 ## Preparação da nuvem
 
@@ -13,4 +13,4 @@ Não execute `seed-demo` em produção. O código não inicializa o esquema Post
 
 ## Situação e validação pendente
 
-Há código e configuração de implantação, mas este repositório não registra URL de produção, evidência de implantação ativa nem resultado de teste integrado com PostgreSQL. É necessário registrar esses dados após verificar o ambiente real. O envio SMTP real e o agendamento operacional de créditos e notificações também dependem de configuração externa.
+O endereço cadastrado como site do repositório é https://sistema-de-moeda-estudantil-sistema.vercel.app. Em 24/11/2026, a requisição à página inicial retornou **HTTP 500**; a aplicação publicada ainda precisa de correção. A conta Vercel conectada não apresentou o projeto, impedindo a consulta dos logs e da configuração. Não há resultado de teste integrado com PostgreSQL. O envio SMTP real e o agendamento operacional de créditos e notificações também dependem de configuração externa.

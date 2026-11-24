@@ -32,7 +32,7 @@ def acesso(*perfis):
 @routes.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
-        conta = ContaDAO.por_email(request.form.get('email', '').strip())
+        conta = ContaDAO.por_email(request.form.get('email', '').strip().lower())
         if conta and check_password_hash(conta['senha_hash'], request.form.get('senha', '')):
             session.clear()
             session['conta_id'] = conta['id']

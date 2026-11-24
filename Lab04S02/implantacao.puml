@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 title Implantação prevista - Sistema de Moeda Estudantil
 left to right direction
 actor "Usuário" as usuario

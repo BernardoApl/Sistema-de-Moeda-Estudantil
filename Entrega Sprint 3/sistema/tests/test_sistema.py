@@ -33,6 +33,12 @@ class SistemaTest(unittest.TestCase):
     def login(self,perfil):
         return self.post('/login',{'email':perfil+'@demo.local','senha':'Demo12345!'})
 
+    def test_login_email_maiusculo(self):
+        response = self.post('/login', {'email': '  ALUNO@DEMO.LOCAL  ', 'senha': 'Demo12345!'})
+        self.assertEqual(response.status_code, 200)
+        with self.client.session_transaction() as session:
+            self.assertEqual(session.get('conta_id'), self.aluno)
+
     def preparar_resgate(self):
         creditar_semestre('2026-2')
         transferir(self.professor,self.aluno,200,'Participação')

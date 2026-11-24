@@ -1,0 +1,300 @@
+diff --git a/README.md b/README.md
+index e30b1b8..47c94cd 100644
+--- a/README.md
++++ b/README.md
+@@ -1,133 +1,44 @@
+ # Sistema de Moeda Estudantil
+ 
+-Sistema web para estimular o reconhecimento do mérito estudantil por meio de uma moeda virtual. Professores distribuem moedas aos alunos como forma de reconhecimento, e os alunos as trocam por produtos e descontos oferecidos por empresas parceiras.
++Aplicação acadêmica da PUC Minas para reconhecimento do mérito estudantil. Professores enviam moedas a alunos da sua instituição; alunos consultam o extrato e resgatam vantagens de empresas parceiras.
+ 
+-Projeto do **Laboratório 3** da disciplina **Projeto de Software**, do curso de Engenharia de Software da **PUC Minas** (2º semestre de 2026), sob orientação da **Profa. Milena Menezes Adão**.
++**Integrantes:** Henrique Pereira, Gabriel Santos, Luiz Henrique Horta e Luiz Felipe Ribeiro.
+ 
+----
++## Tecnologias e arquitetura
+ 
+-## Integrantes
++Java 24 (configurado no `pom.xml`), Spring Boot 3.4.5, Spring MVC, Thymeleaf, Spring Security, Spring Data JPA, H2 em desenvolvimento e PostgreSQL no perfil de produção. O Maven gerencia dependências e testes. Controladores recebem requisições, serviços coordenam as regras, repositórios acessam dados e templates compõem as telas.
+ 
+-| Nome |
+-|---|
+-| Henrique Pereira |
+-| Gabriel Santos |
+-| Luiz Henrique Horta |
+-| Luiz Felipe Ribeiro |
++## Executar em desenvolvimento
+ 
+----
++Requisitos: JDK 24 compatível e Maven instalado; não há Maven Wrapper no repositório. Na raiz:
+ 
+-## Sobre o sistema
+-
+-### Perfis de usuário
+-
+-| Perfil | O que faz |
+-|---|---|
+-| **Aluno** | Se cadastra, recebe moedas, consulta o extrato e troca moedas por vantagens |
+-| **Professor** | Pré-cadastrado pela instituição; envia moedas aos alunos com uma mensagem de reconhecimento e consulta o extrato |
+-| **Empresa parceira** | Se cadastra e oferece vantagens (descrição, foto e custo em moedas); recebe e-mail para conferir as trocas |
+-
+-### Regras de negócio principais
+-
+-- Alunos informam nome, e-mail, CPF, RG, endereço, instituição de ensino e curso no cadastro.
+-- Instituições e professores são **pré-cadastrados**; cada professor tem nome, CPF, departamento e vínculo explícito com uma instituição.
+-- A cada semestre, cada professor recebe **1.000 moedas**, acumuláveis com o saldo atual.
+-- Para enviar moedas, o professor precisa de saldo suficiente e deve informar uma **mensagem obrigatória** com o motivo.
+-- O aluno é **notificado por e-mail** ao receber moedas.
+-- Professores e alunos consultam o **extrato** (saldo e transações).
+-- Ao trocar moedas por uma vantagem, o valor é debitado do saldo e um **e-mail com cupom** é enviado ao aluno e outro ao parceiro, ambos com o **mesmo código** gerado pelo sistema.
+-- Todos os perfis acessam o sistema com **login e senha**, e todas as funcionalidades exigem autenticação.
+-
+----
+-
+-## Tecnologias
+-
+-> A stack abaixo é a proposta inicial do grupo e será confirmada na Sprint 2.
+-
+-| Camada | Tecnologia |
+-|---|---|
+-| Linguagem | Java 25 |
+-| Framework | Spring Boot |
+-| Arquitetura | MVC |
+-| Persistência | Spring Data JPA (ORM) |
+-| Banco de dados | A definir (ex.: PostgreSQL; H2 para desenvolvimento) |
+-| Front-end | A definir (ex.: Thymeleaf, renderizado no servidor) |
+-| Segurança | Spring Security (login, senha com hash e controle por perfil) |
+-| E-mail | Spring Mail (SMTP) |
+-| Build | Maven |
+-| Versionamento | Git e GitHub |
+-
+----
+-
+-## Arquitetura
+-
+-O sistema segue o padrão **MVC**:
+-
+-- **Model**: entidades de domínio (`Aluno`, `Professor`, `EmpresaParceira`, `InstituicaoEnsino`, `Vantagem`, `Transacao`, `EnvioMoedas`, `ResgateVantagem`).
+-- **View**: páginas de cadastro, login, extrato e catálogo de vantagens.
+-- **Controller**: recebem as requisições, validam a entrada e delegam às regras de negócio.
+-
+-Apoiam essas camadas os **serviços** (regras de negócio), os **repositórios/DAO** (acesso ao banco), o serviço de **e-mail** e o **agendador** que credita as moedas semestrais.
+-
+-Os diagramas completos estão em [`docs/`](docs/).
+-
+----
+-
+-## Documentação e modelagem
+-
+-| Artefato | Local | Sprint |
+-|---|---|---|
+-| Casos de uso, histórias de usuário, classes e componentes | [`docs/sprint1.md`](docs/sprint1.md) | 1 |
+-| Diagrama de casos de uso (PlantUML) | [`docs/casos-de-uso.puml`](docs/casos-de-uso.puml) | 1 |
+-| Modelo ER | `docs/` (a produzir) | 2 |
+-| Slides da arquitetura e da persistência | `docs/` (a produzir) | 3 |
+-
+-Os modelos UML são versionados neste repositório e atualizados sempre que o projeto exigir.
+-
+----
+-
+-## Cronograma
+-
+-- [x] **Sprint 1 (Lab03S01)**: diagrama de casos de uso, histórias do usuário, diagrama de classes e diagrama de componentes
+-- [ ] **Sprint 2 (Lab03S02)**: modelo ER, estratégia de acesso ao banco (ORM, DAO etc.) e CRUDs de aluno e empresa parceira (versão inicial: front-end e comunicação com o back-end)
+-- [ ] **Sprint 3 (Lab03S03)**: CRUDs de aluno e empresa parceira (versão final), apresentação da arquitetura e da camada de persistência, protótipo final e tutorial das tecnologias escolhidas
+-
+----
+-
+-## Estrutura do repositório
+-
+-```
+-.
+-├── docs/                # modelos UML, modelo ER e slides
+-├── src/
+-│   ├── main/java/       # código-fonte (model, view/controller, service, repository)
+-│   └── main/resources/  # configurações e templates
+-├── pom.xml
+-└── README.md
++```bash
++git clone https://github.com/luizfeliperibs/moeda-estudantil-system.git
++cd moeda-estudantil-system
++mvn spring-boot:run
+ ```
+ 
+----
+-
+-## Como executar
+-
+-> Esta seção será preenchida a partir da Sprint 2, quando houver código executável.
+-
+-Pré-requisitos previstos:
+-
+-- JDK 25
+-- Maven
+-- Banco de dados configurado (ver `application.properties`)
++Acesse <http://localhost:8080>. O perfil `dev` está ativo por padrão e usa H2 em memória: os dados são recriados ao reiniciar. A carga inicial inclui instituições e professores com senha `prof123` e logins `milena.adao`, `joao.silva` e `ana.costa`. Alunos e empresas podem ser cadastrados pela interface. As credenciais são apenas para demonstração.
+ 
+ ```bash
+-git clone <url-do-repositorio>
+-cd <pasta-do-repositorio>
+-mvn spring-boot:run
++mvn test
+ ```
+ 
+----
++## Configuração e limites
++
++- O perfil `prod` usa PostgreSQL; configure `DATABASE_URL` como URL JDBC, `DATABASE_USERNAME` e `DATABASE_PASSWORD`, e selecione o perfil `prod` pela configuração do Spring. O Hibernate está configurado com `ddl-auto=update`; planeje migrações e backup antes de usar dados importantes.
++- Atenção: `DataSeeder` não está restrito ao perfil `dev`. Em um banco vazio, ele também cria contas com senha conhecida no perfil `prod`; revise isso antes de uma implantação pública.
++- Sem `spring.mail.host`, as mensagens são registradas em log, não enviadas. Configure o provedor SMTP para testar o envio real. O processamento acontece após o commit, sem fila persistente de reenvio.
++- As fotos são gravadas em `uploads/`; em hospedagem com disco efêmero, elas podem desaparecer após reinicialização ou nova implantação.
++- O agendador credita moedas em 1º de janeiro e 1º de julho enquanto a aplicação estiver em execução. O código atual não registra idempotência por semestre: múltiplas instâncias ou execuções podem duplicar créditos; uma execução perdida não é recuperada automaticamente.
+ 
+-## Convenções do grupo
++## Documentação
++
++| Material | Arquivo |
++|---|---|
++| Requisitos e modelos iniciais | [Sprint 1](docs/Sprint1.md) |
++| Persistência e CRUDs | [Sprint 2](docs/sprint2.md) e [modelo ER](docs/modelo-er.mmd) |
++| Fluxos da release 2 | [Sprint 4](docs/Sprint4.md), [envio](docs/sequencia-envio-moedas.puml), [resgate](docs/sequencia-resgate.puml) e [visão geral](docs/visao-geral-interacao.puml) |
++| Revisão e testes | [revisao-e-testes.md](docs/revisao-e-testes.md) |
+ 
+-- Branch principal: `main`. O trabalho é feito em branches por funcionalidade e integrado por pull request.
+-- Mensagens de commit curtas e no imperativo (ex.: `Adiciona cadastro de aluno`).
+-- Modelos UML sempre atualizados junto com o código.
++As fontes PlantUML e Mermaid podem ser renderizadas em ferramentas compatíveis. Consulte o código para confirmar o estado atual dos fluxos.
+diff --git a/src/main/java/com/moedaestudantil/model/EnvioMoedas.java b/src/main/java/com/moedaestudantil/model/EnvioMoedas.java
+index 59a16dd..39f4433 100644
+--- a/src/main/java/com/moedaestudantil/model/EnvioMoedas.java
++++ b/src/main/java/com/moedaestudantil/model/EnvioMoedas.java
+@@ -29,6 +29,13 @@ public class EnvioMoedas extends Transacao {
+ 
+     public EnvioMoedas() {}
+ 
++    public EnvioMoedas(Professor professor, Aluno aluno, int valor, String mensagem) {
++        this.professor = professor;
++        this.aluno = aluno;
++        setValor(valor);
++        this.mensagem = mensagem.trim();
++    }
++
+     public Professor getProfessor() { return professor; }
+     public void setProfessor(Professor professor) { this.professor = professor; }
+ 
+diff --git a/src/main/java/com/moedaestudantil/model/Professor.java b/src/main/java/com/moedaestudantil/model/Professor.java
+index cc2496f..f2a5f5c 100644
+--- a/src/main/java/com/moedaestudantil/model/Professor.java
++++ b/src/main/java/com/moedaestudantil/model/Professor.java
+@@ -55,6 +55,10 @@ public class Professor extends Usuario {
+     public int getSaldo() { return saldo; }
+     public void setSaldo(int saldo) { this.saldo = saldo; }
+ 
++    public void creditar(int valor) {
++        this.saldo = Math.addExact(this.saldo, valor);
++    }
++
+     public InstituicaoEnsino getInstituicao() { return instituicao; }
+     public void setInstituicao(InstituicaoEnsino instituicao) { this.instituicao = instituicao; }
+ }
+diff --git a/src/main/java/com/moedaestudantil/model/ResgateVantagem.java b/src/main/java/com/moedaestudantil/model/ResgateVantagem.java
+index d9c39aa..0bb5edd 100644
+--- a/src/main/java/com/moedaestudantil/model/ResgateVantagem.java
++++ b/src/main/java/com/moedaestudantil/model/ResgateVantagem.java
+@@ -30,6 +30,13 @@ public class ResgateVantagem extends Transacao {
+ 
+     public ResgateVantagem() {}
+ 
++    public ResgateVantagem(Aluno aluno, Vantagem vantagem, int valor, String codigo) {
++        this.aluno = aluno;
++        this.vantagem = vantagem;
++        setValor(valor);
++        this.codigo = codigo;
++    }
++
+     public Aluno getAluno() { return aluno; }
+     public void setAluno(Aluno aluno) { this.aluno = aluno; }
+ 
+diff --git a/src/main/java/com/moedaestudantil/service/ProfessorService.java b/src/main/java/com/moedaestudantil/service/ProfessorService.java
+index 0f9fcb2..7aa5223 100644
+--- a/src/main/java/com/moedaestudantil/service/ProfessorService.java
++++ b/src/main/java/com/moedaestudantil/service/ProfessorService.java
+@@ -44,7 +44,7 @@ public class ProfessorService {
+     @Transactional
+     public int creditarSemestre() {
+         var professores = professorRepository.findAll();
+-        professores.forEach(p -> p.setSaldo(p.getSaldo() + CREDITO_SEMESTRAL));
++        professores.forEach(p -> p.creditar(CREDITO_SEMESTRAL));
+         professorRepository.saveAll(professores);
+         return professores.size();
+     }
+diff --git a/src/main/java/com/moedaestudantil/service/TransacaoService.java b/src/main/java/com/moedaestudantil/service/TransacaoService.java
+index b4deb41..889fd4b 100644
+--- a/src/main/java/com/moedaestudantil/service/TransacaoService.java
++++ b/src/main/java/com/moedaestudantil/service/TransacaoService.java
+@@ -79,11 +79,7 @@ public class TransacaoService {
+         professorRepository.save(professor);
+         alunoRepository.save(aluno);
+ 
+-        EnvioMoedas envio = new EnvioMoedas();
+-        envio.setProfessor(professor);
+-        envio.setAluno(aluno);
+-        envio.setValor(valor);
+-        envio.setMensagem(form.getMensagem().trim());
++        EnvioMoedas envio = new EnvioMoedas(professor, aluno, valor, form.getMensagem());
+         EnvioMoedas salvo = envioRepository.save(envio);
+ 
+         eventos.publishEvent(new EnvioMoedasRealizado(
+@@ -110,11 +106,7 @@ public class TransacaoService {
+         aluno.setSaldo(aluno.getSaldo() - custo);
+         alunoRepository.save(aluno);
+ 
+-        ResgateVantagem resgate = new ResgateVantagem();
+-        resgate.setAluno(aluno);
+-        resgate.setVantagem(vantagem);
+-        resgate.setValor(custo);
+-        resgate.setCodigo(gerarCodigoUnico());
++        ResgateVantagem resgate = new ResgateVantagem(aluno, vantagem, custo, gerarCodigoUnico());
+         ResgateVantagem salvo = resgateRepository.save(resgate);
+ 
+         EmpresaParceira empresa = vantagem.getEmpresa();
+diff --git a/src/test/java/com/moedaestudantil/service/TransacaoServiceTest.java b/src/test/java/com/moedaestudantil/service/TransacaoServiceTest.java
+index 97e3002..6145703 100644
+--- a/src/test/java/com/moedaestudantil/service/TransacaoServiceTest.java
++++ b/src/test/java/com/moedaestudantil/service/TransacaoServiceTest.java
+@@ -80,6 +80,14 @@ class TransacaoServiceTest {
+         verify(eventos).publishEvent(any(EnvioMoedasRealizado.class));
+     }
+ 
++    @Test
++    void envioNormalizaMensagemAoCriarRegistro() {
++        stubProfessorEAluno();
++        form.setMensagem("  Bom trabalho  ");
++        when(envioRepository.save(any(EnvioMoedas.class))).thenAnswer(i -> i.getArgument(0));
++        assertThat(service.enviarMoedas("milena", form).getMensagem()).isEqualTo("Bom trabalho");
++    }
++
+     @Test
+     @DisplayName("Envio — saldo insuficiente é rejeitado e nada muda")
+     void enviar_saldoInsuficiente() {
+--- /dev/null
++++ b/src/test/java/com/moedaestudantil/service/ProfessorCreditoTest.java
+@@ -0,0 +1,18 @@
++package com.moedaestudantil.service;
++
++import com.moedaestudantil.model.Professor;
++import org.junit.jupiter.api.Test;
++import static org.assertj.core.api.Assertions.*;
++
++class ProfessorCreditoTest {
++    @Test
++    void acumulaSemEstourarInteiro() {
++        Professor professor = new Professor();
++        professor.setSaldo(25);
++        professor.creditar(1000);
++        assertThat(professor.getSaldo()).isEqualTo(1025);
++        professor.setSaldo(Integer.MAX_VALUE);
++        assertThatThrownBy(() -> professor.creditar(1000)).isInstanceOf(ArithmeticException.class);
++        assertThat(professor.getSaldo()).isEqualTo(Integer.MAX_VALUE);
++    }
++}
