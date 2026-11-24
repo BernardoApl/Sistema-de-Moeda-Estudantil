@@ -61,7 +61,7 @@ São capturas de execução com dados fictícios, não telas estáticas usadas p
 
 HU01–HU05: testes de CRUD/login/autorização. HU06: crédito idempotente. HU07: transferência/saldo/motivo/instituição. HU08: fluxo no navegador e consultas de extrato. HU09–HU10: cadastro de vantagem e catálogo no navegador, teste de propriedade. HU11: resgate/rollback/preço histórico. HU12: código compartilhado, privacidade e adaptador SMTP simulado.
 
-## Limitações
+## Limitações observadas em 20/10/2026
 
 - SMTP real não foi exercitado; requer provedor e credenciais. Nenhum envio externo foi realizado.
 - Não foi executado ensaio de carga/concorrência; transações de escrita usam bloqueio SQLite.
@@ -72,6 +72,6 @@ HU01–HU05: testes de CRUD/login/autorização. HU06: crédito idempotente. HU0
 - Snapshot S2 compartilha esquema e infraestrutura previstos para S3, mas expõe somente autenticação e CRUDs.
 - Não há evidência de apresentação semanal, publicação no GitHub ou submissão acadêmica.
 
-## Atualiza??o posterior
+## Atualização posterior
 
-A su?te foi ampliada para 25 testes, incluindo pr?-cadastro institucional, valida??o de documentos e marca??o de cupons com verifica??o de propriedade e preven??o de uso repetido. O teste SMTP continua simulado.
+A suíte foi ampliada para 25 testes, incluindo pré-cadastro institucional, validação de documentos e marcação de cupons com verificação de propriedade e prevenção de uso repetido. Essas funcionalidades superam as limitações de documentos e baixa de cupom registradas acima. O teste SMTP continua simulado.

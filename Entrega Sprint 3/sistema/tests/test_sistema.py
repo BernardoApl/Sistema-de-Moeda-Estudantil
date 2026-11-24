@@ -11,7 +11,7 @@ from services import salvar_conta, transferir, resgatar, creditar_semestre, salv
 class SistemaTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.app = create_app({'TESTING':True,'SECRET_KEY':'test','DATABASE':str(Path(self.temp.name)/'test.sqlite3')})
+        self.app = create_app({'TESTING':True,'SECRET_KEY':'test','DATABASE_URL':None,'DATABASE':str(Path(self.temp.name)/'test.sqlite3')})
         self.ctx = self.app.app_context()
         self.ctx.push()
         self.app.test_cli_runner().invoke(args=['seed-demo'])

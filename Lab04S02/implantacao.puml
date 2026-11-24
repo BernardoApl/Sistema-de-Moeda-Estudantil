@@ -1,0 +1,25 @@
+@startuml
+title Implantação prevista - Sistema de Moeda Estudantil
+left to right direction
+actor "Usuário" as usuario
+node "Dispositivo do usuário" {
+  artifact "Navegador web" as navegador
+}
+cloud "Vercel" {
+  node "Função Python" {
+    artifact "Flask: app.py\nMVC, serviços e DAOs" as flask
+  }
+  artifact "Arquivos estáticos" as static
+}
+database "PostgreSQL gerenciado" as postgres
+node "Ambiente de operação" {
+  artifact "Comandos Flask CLI\nprofessores, créditos e e-mails" as cli
+}
+cloud "Provedor SMTP" as smtp
+usuario --> navegador
+navegador --> flask : HTTPS / HTML
+navegador --> static : HTTPS
+flask --> postgres : SQL / TLS configurável
+cli --> postgres : SQL
+cli --> smtp : SMTP + STARTTLS
+@enduml
