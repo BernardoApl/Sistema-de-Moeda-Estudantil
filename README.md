@@ -2,9 +2,15 @@
 
 Projeto acadêmico em Python e Flask para reconhecimento do mérito estudantil. Professores distribuem moedas, alunos consultam extratos e resgatam vantagens, e empresas parceiras gerenciam ofertas e conferem cupons.
 
-## Como executar no Windows
+## Como executar
 
-É necessário ter Python 3.12 (testado) e acesso à internet para instalar as dependências. Abra o PowerShell na pasta em que deseja guardar o projeto e execute:
+É necessário ter Python 3.12 (testado), Git e acesso à internet para instalar as dependências. No Linux, o Python precisa incluir o módulo `venv` (em Debian ou Ubuntu, instale o pacote correspondente, como `python3-venv`).
+
+Se baixou o ZIP, extraia-o e abra o terminal na pasta que contém este README; nos comandos abaixo, pule `git clone` e `cd Sistema-de-Moeda-Estudantil`.
+
+### Windows (PowerShell)
+
+Abra o PowerShell na pasta em que deseja guardar o projeto e execute:
 
 ```powershell
 git clone https://github.com/BernardoApl/Sistema-de-Moeda-Estudantil.git
@@ -17,7 +23,24 @@ python -m venv .venv
 .\.venv\Scripts\python.exe app.py
 ```
 
-Se baixou o ZIP, extraia-o e abra o PowerShell na pasta que contém este README; pule os dois primeiros comandos. Acesse **http://127.0.0.1:5000** e entre com uma das contas fictícias:
+### Linux
+
+Abra o terminal na pasta em que deseja guardar o projeto e execute:
+
+```bash
+git clone https://github.com/BernardoApl/Sistema-de-Moeda-Estudantil.git
+cd Sistema-de-Moeda-Estudantil
+cd "Entrega Sprint 3/sistema"
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+./.venv/bin/python -m flask --app app seed-demo
+./.venv/bin/python -m flask --app app creditar-semestre 2026-2
+./.venv/bin/python app.py
+```
+
+### Acesso e contas de demonstração
+
+Acesse **http://127.0.0.1:5000** no navegador e entre com uma das contas fictícias:
 
 | Perfil | E-mail | Senha |
 |---|---|---|
@@ -25,14 +48,22 @@ Se baixou o ZIP, extraia-o e abra o PowerShell na pasta que contém este README;
 | Aluno | `aluno@demo.local` | `Demo12345!` |
 | Empresa | `empresa@demo.local` | `Demo12345!` |
 
-O banco SQLite é criado localmente. Os comandos de demonstração não devem ser usados em produção; o crédito para o mesmo semestre não é repetido. Para encerrar o servidor, pressione `Ctrl+C`. Para abrir novamente, entre na pasta `Entrega Sprint 3/sistema` e execute `.\.venv\Scripts\python.exe app.py`.
+O banco SQLite é criado localmente. Os comandos de demonstração não devem ser usados em produção; o crédito para o mesmo semestre não é repetido. Para encerrar o servidor, pressione `Ctrl+C`. Para abrir novamente, entre na pasta `Entrega Sprint 3/sistema` e execute `.\.venv\Scripts\python.exe app.py` no Windows ou `./.venv/bin/python app.py` no Linux.
 
-Para usar SQLite, deixe as variáveis `DATABASE_URL` e `POSTGRES_URL_NON_POOLING` sem definição no PowerShell. Se a porta 5000 já estiver em uso, encerre o outro processo antes de iniciar a aplicação.
+Para usar SQLite, deixe as variáveis `DATABASE_URL` e `POSTGRES_URL_NON_POOLING` sem definição no terminal. Se a porta 5000 já estiver em uso, encerre o outro processo antes de iniciar a aplicação.
 
-Para rodar os testes na mesma pasta:
+### Executar os testes
+
+Na pasta `Entrega Sprint 3/sistema`, execute no Windows:
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+No Linux:
+
+```bash
+./.venv/bin/python -m unittest discover -s tests -v
 ```
 
 O [guia detalhado](<Entrega Sprint 3/README.md>) inclui pré-cadastro de professores, SMTP e outras instruções. A configuração para nuvem utiliza PostgreSQL. O envio efetivo de e-mails exige SMTP configurado e execução do comando da caixa de saída.
