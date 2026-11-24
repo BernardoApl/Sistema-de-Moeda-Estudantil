@@ -1,6 +1,12 @@
 # Avaliação crítica — projeto Moeda Estudantil
 
-Projeto avaliado: https://github.com/luizfeliperibs/moeda-estudantil-system, commit `c364d8b`. Análise realizada em 24/11/2026. As observações abaixo distinguem leitura do código de comportamento efetivamente testado.
+Projeto avaliado: https://github.com/luizfeliperibs/moeda-estudantil-system, commit `c364d8b`. As observações abaixo distinguem leitura do código de comportamento efetivamente testado.
+
+## Resultado da execução
+
+**O projeto funcionou localmente.** A aplicação iniciou com o perfil de desenvolvimento e banco H2 em memória. Foi possível entrar como professor e acessar as páginas de envio de moedas e extrato. Os **55 testes da versão avaliada passaram**, sem falhas ou erros.
+
+O README original não foi suficiente para reproduzir a execução sozinho: foi necessário obter no código as credenciais e detalhes de configuração. Também foi preciso localizar uma instalação do Maven e ajustar a execução dos testes ao Java 25 disponível na máquina. Não foram verificados PostgreSQL, envio real de e-mails ou implantação em nuvem.
 
 ## Arquitetura e tecnologias
 
@@ -13,6 +19,16 @@ O agendador chama `ProfessorService.creditarSemestre()` em janeiro e julho. O m�
 Há pastas de código, testes e documentação, mas arquivos gerados em `target/` estão versionados, dificultando a revisão e podendo ficar desatualizados em relação às fontes. O README original descreve a execução como futura, usa placeholders no clone, afirma Java 25 enquanto o `pom.xml` configura Java 24, e contém referências antigas ou inexistentes. Não há Maven Wrapper; a máquina precisa ter Maven instalado. O perfil `dev` usa H2 em memória e reinicia os dados ao reiniciar a aplicação.
 
 Na máquina de avaliação foi encontrado Java 25 e Maven em cache, mas não Maven no PATH. A primeira tentativa com Java 25 teve erros de instrumentação do Mockito. Com `-Dnet.bytebuddy.experimental=true`, uma execução incremental falhou porque havia um template antigo em `target/`; após `mvn clean test`, os **57 testes passaram** (incluindo dois testes adicionados à proposta). Essa execução não substitui a verificação com JDK 24 nem testa PostgreSQL ou SMTP reais.
+
+### Execução da versão original
+
+O projeto foi executado no Windows com Java 25 e Maven 3.9.11, usando o perfil `dev` e H2 em memória. Como o comando `mvn` não estava disponível no terminal, foi necessário localizar uma instalação do Maven e executá-la pelo caminho completo. O README não informa o endereço de clone preenchido, as credenciais de demonstração nem todas as instruções de configuração; foi necessário consultar o código para encontrá-las.
+
+Após reconstruir os artefatos, a aplicação iniciou na porta de teste 8092. As páginas de login e cadastro de aluno e empresa responderam com HTTP 200. O professor de demonstração conseguiu autenticar; as páginas de envio e extrato responderam com HTTP 200. A tentativa de acessar a área de vantagens do aluno como professor retornou HTTP 403, conforme a restrição de perfil esperada.
+
+Após reconstruir o projeto, os **55 testes passaram, sem falhas ou erros**. No Java 25, foi necessário usar a opção `-Dnet.bytebuddy.experimental=true` para o Mockito funcionar. O projeto configura Java 24 no Maven, mas essa versão não estava instalada para comparação.
+
+Essa verificação confirma a inicialização local e esses acessos específicos. Não comprova, por si só, entrega de e-mails, implantação em nuvem ou persistência PostgreSQL. O banco de desenvolvimento é descartado ao encerrar o processo.
 
 ## Diagramas e alinhamento
 
